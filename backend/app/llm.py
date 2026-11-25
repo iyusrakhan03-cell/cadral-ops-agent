@@ -15,11 +15,14 @@ from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponen
 
 from .config import get_settings
 
-# USD per 1M tokens (input, output) — Groq list prices.
+# USD per 1M tokens (input, output) — Groq pay-as-you-go list prices (we run on the free tier).
 PRICES = {
-    "llama-3.3-70b-versatile": (0.59, 0.79),
-    "llama-3.1-8b-instant": (0.05, 0.08),
+    "openai/gpt-oss-120b": (0.15, 0.60),
+    "openai/gpt-oss-20b": (0.075, 0.30),
+    "qwen/qwen3.8-27b": (0.29, 0.59),
 }
+# GPT-OSS models "think" before answering; low effort keeps support replies fast and cheap.
+REASONING_MODELS = {"openai/gpt-oss-120b", "openai/gpt-oss-20b"}
 
 
 class LLMUnavailable(RuntimeError):
@@ -72,8 +75,9 @@ def _call(model: str, messages: list[dict], **kw):
     return client().chat.completions.create(model=model, messages=messages, **kw)
 
 
-def chat(messages: list[dict], *, temperature: float = 0.1, max_tokens: int = 700,
-         tools: list | None = None, json_mode: bool = False, model: str | None = None) -> LLMResult:
+def chat(messages: list[dict], *, temperature: float = 0.1, max_tokens: int = 1500,
+         tools: list | None = None, json_mode: bool = False, model: str | None = None,
+         reasoning_effort: str = "low") -> LLMResult:
     s = get_settings()
     kw: dict = {"temperature": temperature, "max_tokens": max_tokens}
     if tools:
@@ -88,8 +92,9 @@ def chat(messages: list[dict], *, temperature: float = 0.1, max_tokens: int = 70
     last_err: Exception | None = None
     for i, m in enumerate(models):
         t0 = time.perf_counter()
+        extra = {"extra_body": {"reasoning_effort": reasoning_effort}} if m in REASONING_MODELS else {}
         try:
-            r = _call(m, messages, **kw)
+            r = _call(m, messages, **kw, **extra)
         except Exception as e:  # noqa: BLE001 — try the next model, then give up loudly
             last_err = e
             continue

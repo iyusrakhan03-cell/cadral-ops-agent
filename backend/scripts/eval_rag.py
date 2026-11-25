@@ -20,8 +20,15 @@ from app.config import REPO_DIR, get_settings
 from app.rag.index import get_index
 
 
+NUMBER_WORDS = {"one": "1", "two": "2", "three": "3", "four": "4", "five": "5", "six": "6", "seven": "7",
+                "eight": "8", "nine": "9", "ten": "10", "twelve": "12", "fourteen": "14", "thirty": "30"}
+
+
 def norm(s: str) -> str:
-    return re.sub(r"\s+", " ", s.lower().replace("’", "'")).strip()
+    """Compare meaning, not typography: 'five working days' == '5 working days', 'hand-wash' == 'hand wash'."""
+    s = s.lower().replace("’", "'").replace("-", " ").replace("‑", " ")
+    s = re.sub(r"\b(" + "|".join(NUMBER_WORDS) + r")\b", lambda m: NUMBER_WORDS[m.group(1)], s)
+    return re.sub(r"\s+", " ", s).strip()
 
 
 def main():

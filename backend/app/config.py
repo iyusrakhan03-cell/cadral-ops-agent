@@ -17,8 +17,8 @@ class Settings(BaseSettings):
 
     # --- LLM ---
     groq_api_key: str = ""
-    llm_model: str = "llama-3.3-70b-versatile"
-    llm_fallback_model: str = "llama-3.1-8b-instant"
+    llm_model: str = "openai/gpt-oss-120b"
+    llm_fallback_model: str = "openai/gpt-oss-20b"
 
     # --- Database (blank = local SQLite file) ---
     database_url: str = ""
@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     rag_top_k: int = 5                # how many chunks go to the LLM
     # Cross-encoder logit below which we refuse to answer ("I don't know").
     # Calibrated on data/eval_rag_qa.jsonl with scripts/eval_rag.py.
-    rag_min_score: float = -3.0
+    rag_min_score: float = -5.0
 
     @property
     def db_url(self) -> str:

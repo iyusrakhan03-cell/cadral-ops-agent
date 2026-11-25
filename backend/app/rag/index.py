@@ -66,6 +66,8 @@ class HybridIndex:
         self.chunks = chunks
         self.embeddings = embeddings  # (n, d), L2-normalised
         self.bm25 = BM25Okapi([tokenize(c.text) for c in chunks])
+        # Staff-only documents (file name starts "internal-") are never shown to customers.
+        self.internal = np.array([c.doc.startswith("internal-") for c in chunks])
         s = get_settings()
         cache = str(s.index_dir.parent / ".fastembed_cache")
         from fastembed import TextEmbedding
@@ -97,19 +99,24 @@ class HybridIndex:
         return cls(chunks, np.load(s.index_dir / "embeddings.npy"))
 
     # ------------------------------------------------------------ search
-    def search(self, query: str, top_k: int | None = None) -> SearchResult:
+    def search(self, query: str, top_k: int | None = None, include_internal: bool = False) -> SearchResult:
         s = get_settings()
         top_k = top_k or s.rag_top_k
         n = s.rag_candidates
         t0 = time.perf_counter()
 
         bm25_scores = self.bm25.get_scores(tokenize(query))
+        if not include_internal:
+            bm25_scores[self.internal] = 0
         bm25_order = [i for i in np.argsort(-bm25_scores)[:n] if bm25_scores[i] > 0]
         t1 = time.perf_counter()
 
         q = np.array(next(iter(self._embedder.query_embed(query))), dtype=np.float32)
         q /= np.linalg.norm(q)
-        vec_order = list(np.argsort(-(self.embeddings @ q))[:n])
+        sims = self.embeddings @ q
+        if not include_internal:
+            sims[self.internal] = -np.inf
+        vec_order = list(np.argsort(-sims)[:n])
         t2 = time.perf_counter()
 
         # Reciprocal Rank Fusion (k=60 is the standard constant from the RRF paper).

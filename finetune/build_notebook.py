@@ -19,7 +19,7 @@ md("""
 # Fine-tuning a 1.5B router model — Thistle & Pine support system
 
 **Goal:** fine-tune **Qwen2.5-1.5B-Instruct** to classify customer messages into the 6 intents the Router uses,
-then compare against (a) the same model before fine-tuning and (b) a large API model (Llama-3.3-70B on Groq).
+then compare against (a) the same model before fine-tuning and (b) a large API model (GPT-OSS-120B on Groq).
 
 | label | goes to |
 |---|---|
@@ -155,7 +155,7 @@ results["finetuned"], ft_preds = run_local("Qwen2.5-1.5B fine-tuned (LoRA)")
 results["finetuned"]["train_minutes_t4"] = round(train_minutes, 1)
 """)
 
-md("## 6. Large API model for comparison (Llama-3.3-70B on Groq) — optional")
+md("## 6. Large API model for comparison (GPT-OSS-120B on Groq) — optional")
 code("""
 from google.colab import userdata
 try:
@@ -170,16 +170,16 @@ if GROQ_KEY:
         t0 = time.perf_counter()
         for attempt in range(5):
             try:
-                resp = g.chat.completions.create(model="llama-3.3-70b-versatile", messages=to_messages(r["text"]),
-                                                 max_tokens=8, temperature=0); break
+                resp = g.chat.completions.create(model="openai/gpt-oss-120b", messages=to_messages(r["text"]),
+                                                 max_tokens=400, temperature=0, reasoning_effort="low"); break
             except Exception as e:
                 time.sleep(2 * (attempt + 1))
         lats.append((time.perf_counter() - t0) * 1000)
         preds.append(parse_label(resp.choices[0].message.content))
         toks_in += resp.usage.prompt_tokens; toks_out += resp.usage.completion_tokens
         time.sleep(2.1)  # stay under the free-tier 30 requests/minute limit
-    cost_1k = round((toks_in * 0.59 + toks_out * 0.79) / 1e6 / len(test) * 1000, 4)
-    results["large_api"] = report("Llama-3.3-70B via Groq API", [r["label"] for r in test], preds, lats, cost_1k)
+    cost_1k = round((toks_in * 0.15 + toks_out * 0.60) / 1e6 / len(test) * 1000, 4)
+    results["large_api"] = report("GPT-OSS-120B via Groq API", [r["label"] for r in test], preds, lats, cost_1k)
 else:
     print("No GROQ_API_KEY secret — skipping large-model comparison")
 """)

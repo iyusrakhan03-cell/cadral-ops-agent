@@ -23,6 +23,7 @@ Answer the customer's question using ONLY the numbered sources provided.
 Rules:
 - Every sentence that states a fact must end with its source number in square brackets, e.g. "Standard delivery costs £3.95 [2]."
 - Never use outside knowledge, never guess, never invent prices, dates, policies or products.
+- If a source states a rule that settles the question, apply it and answer (e.g. "Klarna needs orders of £30+" answers "can I use Klarna on £20?" with "No").
 - If the sources do not contain the answer, reply with exactly: NO_ANSWER
 - If the sources answer only part of the question, answer that part and say clearly which part you don't know.
 - Be warm, concise and plain-spoken (British English). 1-4 short sentences, or a short list if steps are needed.
@@ -64,6 +65,16 @@ class AnswerResult:
         }
 
 
+def normalise(text: str) -> str:
+    """Clean model typography: GPT-OSS cites as 【1】 and uses narrow/non-breaking spaces ("20 %", "10 am")."""
+    text = text.strip()
+    text = re.sub(r"【\s*(\d+)[^】]*】", r"[\1]", text)          # 【1】 / 【1†L3】 -> [1]
+    text = re.sub(r"\[(\d+)\s*,\s*(\d+)\]", r"[\1][\2]", text)  # [1, 2] -> [1][2]
+    text = text.replace(" ", " ").replace(" ", " ").replace("‑", "-").replace("‐", "-")
+    text = re.sub(r"(\d) (%|°|mm\b|cm\b|am\b|pm\b)", r"\1\2", text)
+    return text
+
+
 def _format_sources(result: SearchResult) -> str:
     return "\n\n".join(f"[{i}] ({h.chunk.title} — {h.chunk.location})\n{h.chunk.text}"
                        for i, h in enumerate(result.hits, 1))
@@ -95,8 +106,8 @@ def answer_question(question: str, *, history: list[dict] | None = None,
     messages += (history or [])[-6:]
     messages.append({"role": "user", "content": f"Sources:\n{_format_sources(result)}\n\nCustomer question: {question}"})
 
-    llm = chat(messages, temperature=0.1, max_tokens=400)
-    text = llm.content.strip()
+    llm = chat(messages, temperature=0.1, max_tokens=1200)
+    text = normalise(llm.content)
 
     # Layer 2: the model said it can't answer.
     if "NO_ANSWER" in text:
