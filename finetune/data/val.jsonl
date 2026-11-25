@@ -1,0 +1,120 @@
+{"text": "what's your warranty on furniture", "label": "policy_question"}
+{"text": "How much is the toaster", "label": "product_question"}
+{"text": "can i get the king size fitted sheet engraved thanks", "label": "product_question"}
+{"text": "Hi, the oak chopping board caught fire in my kitchen", "label": "escalation"}
+{"text": "Hi, hiya", "label": "chit_chat"}
+{"text": "Test", "label": "chit_chat"}
+{"text": "Hello, what does final sale mean", "label": "policy_question"}
+{"text": "if i dont get my money back today i'm going to trading standards", "label": "escalation"}
+{"text": "does the bamboo bath mat come with a warranty", "label": "product_question"}
+{"text": "thanks for your help", "label": "chit_chat"}
+{"text": "hey lovely, appreciate it", "label": "chit_chat"}
+{"text": "the toaster glass shattered and cut my daughter", "label": "escalation"}
+{"text": "i want to exchange my wine glasses", "label": "order_action"}
+{"text": "the throw blanket smelled of burning plastic and smoked", "label": "escalation"}
+{"text": "do you do discounts for bulk orders", "label": "policy_question"}
+{"text": "Hi there - can you help me with my maths homework", "label": "chit_chat"}
+{"text": "hey has my order shipped? its tp-100555", "label": "order_tracking"}
+{"text": "where is my order tp-100576", "label": "order_tracking"}
+{"text": "how do i clean my sideboard", "label": "product_question"}
+{"text": "the linen duvet cover caught fire in my kitchen", "label": "escalation"}
+{"text": "how do i clean my bamboo bath mat", "label": "product_question"}
+{"text": "the toaster is missing from my parcel TP-100310", "label": "order_action"}
+{"text": "hey where is my order?? two weeks and nothing. worst company ever asap", "label": "escalation"}
+{"text": "the sideboard caught fire in my kitchen", "label": "escalation"}
+{"text": "my reed diffuser hasnt arrived yet, order TP-100268", "label": "order_tracking"}
+{"text": "do you deliver to australia?", "label": "policy_question"}
+{"text": "Bye", "label": "chit_chat"}
+{"text": "Hi, It's been 3 since I ordered, where's my stuff", "label": "order_tracking"}
+{"text": "Hi, let me talk to a human please, this bot isnt helping cheers", "label": "escalation"}
+{"text": "is my non-stick saucepan set on its way", "label": "order_tracking"}
+{"text": "let me talk to a human please, this bot isnt helping", "label": "escalation"}
+{"text": "has tp-100555 been dispatched", "label": "order_tracking"}
+{"text": "what's the weather like in leeds asap", "label": "chit_chat"}
+{"text": "how long does the kettle candle burn for", "label": "product_question"}
+{"text": "u lot are a joke. I want compensation for my wasted time", "label": "escalation"}
+{"text": "the tracking link isnt working for TP-100324", "label": "order_tracking"}
+{"text": "please refund the delivery charge on TP-100506", "label": "order_action"}
+{"text": "can you check on my order pls", "label": "order_tracking"}
+{"text": "the linen duvet cover glass shattered and cut my daughter", "label": "escalation"}
+{"text": "Hi there - hey how are you", "label": "chit_chat"}
+{"text": "what colours does the storage ottoman come in", "label": "product_question"}
+{"text": "i'd like to return part of order tp-100597", "label": "order_action"}
+{"text": "Perfect thanks", "label": "chit_chat"}
+{"text": "stop my order tp-100387 before it ships", "label": "order_action"}
+{"text": "bye", "label": "chit_chat"}
+{"text": "do I pay customs if I order to Belgium", "label": "policy_question"}
+{"text": "wrong item sent, i ordered a sideboard. order TP-100219", "label": "order_action"}
+{"text": "the non-stick saucepan set arrived broken, I'd like a refnd", "label": "order_action"}
+{"text": "is the wine glasses microwave safe", "label": "product_question"}
+{"text": "what is the bamboo bath mat made of", "label": "product_question"}
+{"text": "my delivery is late, order tp-100142", "label": "order_tracking"}
+{"text": "can you update my address for order tp-100471 to 14 mill road, york", "label": "order_action"}
+{"text": "WHERE IS MY ORDER?? two weeks and NOTHING. worst company ever", "label": "escalation"}
+{"text": "whats the difference between ur pine pro pans and the normal ones", "label": "product_question"}
+{"text": "hey how do I get the newsletter discount", "label": "policy_question"}
+{"text": "tracking for tp-100380 hasn't updated in 4 days", "label": "order_tracking"}
+{"text": "hi", "label": "chit_chat"}
+{"text": "Do u do discounts for bulk orders", "label": "policy_question"}
+{"text": "what colours does the stoneware dinner set come in", "label": "product_question"}
+{"text": "Hi, refund my coffee mugs please, it's not what i expected", "label": "order_action"}
+{"text": "Hi, thank you, that's all", "label": "chit_chat"}
+{"text": "do you deliver to Ireland", "label": "policy_question"}
+{"text": "Hi, what's your name", "label": "chit_chat"}
+{"text": "refund my pillow please, it's not what i expected", "label": "order_action"}
+{"text": "absolutely disgusting service. never shopping here again. sort TP-100506 out or i'll post everywhere", "label": "escalation"}
+{"text": "good morning", "label": "chit_chat"}
+{"text": "can i get the toaster engraved", "label": "product_question"}
+{"text": "Hello, how long does standard delivery take", "label": "policy_question"}
+{"text": "your bath towel set burned my hand, this is dangerous", "label": "escalation"}
+{"text": "Do I pay customs if I order to Ireland thanks", "label": "policy_question"}
+{"text": "hey this is ridiculous, third time I've contacted you about TP-100296. I want a manager NOW", "label": "escalation"}
+{"text": "You have stolen my money, i want a full refund immediately or i'm reporting you", "label": "escalation"}
+{"text": "thanks so much", "label": "chit_chat"}
+{"text": "has my order shipped? its TP-100373", "label": "order_tracking"}
+{"text": "the coffee mugs caught fire in my kitchen", "label": "escalation"}
+{"text": "what does final sale mean", "label": "policy_question"}
+{"text": "i'm furious. u charged me two weeks ago and ignored 4 emails", "label": "escalation"}
+{"text": "where is my order TP-100506", "label": "order_tracking"}
+{"text": "how heavy is the pine pro frying pan", "label": "product_question"}
+{"text": "do I pay customs if I order to the US", "label": "policy_question"}
+{"text": "hey Let me talk to a human please, this bot isnt helping cheers", "label": "escalation"}
+{"text": "hey how are u", "label": "chit_chat"}
+{"text": "my child swallowed a piece that broke off the knife block", "label": "escalation"}
+{"text": "can i get the pasta bowls engraved", "label": "product_question"}
+{"text": "tracking for TP-100443 hasn't updated in a week", "label": "order_tracking"}
+{"text": "you have stolen my money, i want a full refund immediately or i'm reporting you", "label": "escalation"}
+{"text": "this is ridiculous, third time I've contacted u about TP-100212. I want a manager NOW", "label": "escalation"}
+{"text": "plz cancell my order tp-100464", "label": "order_action"}
+{"text": "If i dont get my money back today i'm going to trading standards", "label": "escalation"}
+{"text": "How do i send back my cast iron casserole? order TP-100569", "label": "order_action"}
+{"text": "Hey how are you", "label": "chit_chat"}
+{"text": "the pillow smelled of burning plastic and smoked", "label": "escalation"}
+{"text": "do u sell bedside tables", "label": "product_question"}
+{"text": "hey hello there", "label": "chit_chat"}
+{"text": "Order TP-100303 - what's the status please", "label": "order_tracking"}
+{"text": "can i swap the bedside table for a different colour", "label": "order_action"}
+{"text": "how many does the kettle set include", "label": "product_question"}
+{"text": "can the soy candle go in the oven x", "label": "product_question"}
+{"text": "what is your returns policy", "label": "policy_question"}
+{"text": "hey how are you asap", "label": "chit_chat"}
+{"text": "Hi, lovely, appreciate it", "label": "chit_chat"}
+{"text": "when will the bath towel set be back in stock", "label": "product_question"}
+{"text": "hiya thanks", "label": "chit_chat"}
+{"text": "My dilivery is late, oder TP-100387", "label": "order_tracking"}
+{"text": "my parcel says delivered but i havent got it", "label": "order_tracking"}
+{"text": "Do u deliver to France", "label": "policy_question"}
+{"text": "Hi, how long do refunds take", "label": "policy_question"}
+{"text": "my delivary is late, ordr TP-100527", "label": "order_tracking"}
+{"text": "Hello, What's the weather like in leeds", "label": "chit_chat"}
+{"text": "my linen duvet cover has a crack in it, want my money back cheers", "label": "order_action"}
+{"text": "test", "label": "chit_chat"}
+{"text": "lovely, appreciate it asap", "label": "chit_chat"}
+{"text": "do gift cards expire thanks", "label": "policy_question"}
+{"text": "ok great", "label": "chit_chat"}
+{"text": "How do i send back my knife block? order TP-100338", "label": "order_action"}
+{"text": "is the Pine Pro wok induction compatible", "label": "product_question"}
+{"text": "i returned my coffee mugs two weeks ago, where's my refund", "label": "order_action"}
+{"text": "cancell tp-100366 i ordered by mistake", "label": "order_action"}
+{"text": "how heavy is the knife block thanks", "label": "product_question"}
+{"text": "what is the table lamp made of", "label": "product_question"}

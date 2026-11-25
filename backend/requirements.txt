@@ -1,0 +1,19 @@
+# --- API ---
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic-settings==2.7.1
+# --- Database ---
+sqlalchemy==2.0.36
+psycopg[binary]==3.2.3
+# --- LLM ---
+groq==0.13.1
+tenacity==9.0.0
+# --- RAG ---
+fastembed==0.4.2
+rank-bm25==0.2.2
+pypdf==5.1.0
+beautifulsoup4==4.12.3
+numpy<2.1
+# --- Tooling ---
+fpdf2==2.8.2
+python-dotenv==1.0.1

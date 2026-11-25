@@ -1,0 +1,20 @@
+# secrets
+.env
+.env.*
+!.env.example
+# python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+# local data / build outputs
+backend/data/*.db
+backend/index/
+.fastembed_cache/
+*.log
+# node
+node_modules/
+.next/
+# finetune artefacts
+finetune/outputs/
+finetune/*.gguf

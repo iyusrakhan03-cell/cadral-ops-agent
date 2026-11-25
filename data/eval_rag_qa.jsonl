@@ -1,0 +1,40 @@
+{"id":"rag_001","question":"how much is standard delivery?","answerable":true,"must_contain":["£3.95"],"source":"delivery-policy.md"}
+{"id":"rag_002","question":"If I order express delivery on a Friday when will it actually arrive?","answerable":true,"must_contain":["Tuesday"],"source":"delivery-policy.md"}
+{"id":"rag_003","question":"whats the charge for 2 person delivery on a sideboard","answerable":true,"must_contain":["£29"],"source":"delivery-policy.md"}
+{"id":"rag_004","question":"my parcel tracking hasnt updated in over a week, what happens now?","answerable":true,"must_contain":["10 working days"],"source":"delivery-policy.md"}
+{"id":"rag_005","question":"how long do i have to return stuff","answerable":true,"must_contain":["30 days"],"source":"returns-and-refunds-policy.md"}
+{"id":"rag_006","question":"Can I send back a duvet I've opened? It's too warm","answerable":true,"must_contain":["hygiene"],"source":"returns-and-refunds-policy.md"}
+{"id":"rag_007","question":"how long does a refund take once you get my return","answerable":true,"must_contain":["5 working days"],"source":"returns-and-refunds-policy.md"}
+{"id":"rag_008","question":"Is the Pine Pro cast iron skillet dishwasher safe?","answerable":true,"must_contain":["hand wash"],"source":"products.csv"}
+{"id":"rag_009","question":"how much is the kirkstall oak sideboard","answerable":true,"must_contain":["£649"],"source":"products.csv"}
+{"id":"rag_010","question":"what temp can the everyday non stick 28cm frying pan go in the oven at","answerable":true,"must_contain":["180°C"],"source":"products.csv"}
+{"id":"rag_011","question":"What do I need to send you to make a warranty claim?","answerable":true,"must_contain":["order number","photos"],"source":"warranty-and-guarantees.md"}
+{"id":"rag_012","question":"can i use klarna on a £20 order?","answerable":true,"must_contain":["£30"],"source":"payment-options.html"}
+{"id":"rag_013","question":"Can my Pine Pro stainless steel pan go in the oven and how hot?","answerable":true,"must_contain":["220°C"],"source":"cookware-care-guide.md"}
+{"id":"rag_014","question":"which countries outside the uk do u ship to","answerable":true,"must_contain":["Ireland","France","Germany"],"source":"international-delivery.html"}
+{"id":"rag_015","question":"Will I have to pay customs or import VAT when my parcel arrives in France?","answerable":true,"must_contain":["checkout"],"source":"international-delivery.html"}
+{"id":"rag_016","question":"how long are e-gift cards valid for","answerable":true,"must_contain":["24 months"],"source":"gift-cards.html"}
+{"id":"rag_017","question":"how many pine points do i need to get £5 off","answerable":true,"must_contain":["100"],"source":"pine-points-loyalty.html"}
+{"id":"rag_018","question":"what's the black friday discount this year?","answerable":true,"must_contain":["20%"],"source":"discounts-and-promotions.html"}
+{"id":"rag_019","question":"do u have a shop in leeds i can visit to see the bedding","answerable":true,"must_contain":["online"],"source":"faq.html"}
+{"id":"rag_020","question":"What time are you open on Saturdays?","answerable":true,"must_contain":["10am","4pm"],"source":"contact-us.html"}
+{"id":"rag_021","question":"last day to order standard delivery for christmas?","answerable":true,"must_contain":["18 December"],"source":"christmas-2026-delivery.html"}
+{"id":"rag_022","question":"If I buy a present in November can I still return it in January?","answerable":true,"must_contain":["31 January"],"source":"christmas-2026-delivery.html"}
+{"id":"rag_023","question":"what oil should i use on my wooden chopping board","answerable":true,"must_contain":["mineral oil"],"source":"wooden-board-care.html"}
+{"id":"rag_024","question":"how short should i trim the wick on my candel","answerable":true,"must_contain":["5mm"],"source":"candle-care-and-safety.html"}
+{"id":"rag_025","question":"What temperature should I wash linen bedding at?","answerable":true,"must_contain":["40°C"],"source":"bedding-size-and-care-guide.md"}
+{"id":"rag_026","question":"what size is a uk king size duvet in cm","answerable":true,"must_contain":["230","220"],"source":"bedding-size-and-care-guide.md"}
+{"id":"rag_027","question":"How long do you keep my order data?","answerable":true,"must_contain":["6 years"],"source":"privacy-policy.md"}
+{"id":"rag_028","question":"my mug arrived smashed, how long have i got to report it","answerable":true,"must_contain":["48 hours"],"source":"damaged-or-faulty-items.html"}
+{"id":"rag_029","question":"can i change my delivery address after the order has been sent out?","answerable":true,"must_contain":["dispatched"],"source":"order-changes-and-cancellations.html"}
+{"id":"rag_030","question":"whats the discount for recycling my old pan","answerable":true,"must_contain":["10%"],"source":"sustainability.html"}
+{"id":"rag_031","question":"Who is the CEO of Thistle & Pine?","answerable":false,"must_contain":[],"source":null}
+{"id":"rag_032","question":"do you have an app for iphone?","answerable":false,"must_contain":[],"source":null}
+{"id":"rag_033","question":"Do you run an affiliate or influencer programme?","answerable":false,"must_contain":[],"source":null}
+{"id":"rag_034","question":"how many people work at thistle and pine","answerable":false,"must_contain":[],"source":null}
+{"id":"rag_035","question":"Are your non-stick pans PFAS free?","answerable":false,"must_contain":[],"source":null}
+{"id":"rag_036","question":"how much is the klarna late payment fee if i miss an instalment","answerable":false,"must_contain":[],"source":null}
+{"id":"rag_037","question":"Do you offer a wedding gift list service?","answerable":false,"must_contain":[],"source":null}
+{"id":"rag_038","question":"what thread count are ur cotton percale sheets","answerable":false,"must_contain":[],"source":null}
+{"id":"rag_039","question":"Which courier delivers orders to Germany?","answerable":false,"must_contain":[],"source":null}
+{"id":"rag_040","question":"are you hiring? any jobs going at the warehouse","answerable":false,"must_contain":[],"source":null}
