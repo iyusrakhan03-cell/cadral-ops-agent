@@ -1,0 +1,47 @@
+{
+ "results": {
+  "base": {
+   "model": "Qwen2.5-1.5B base (zero-shot)",
+   "accuracy": 0.4667,
+   "macro_f1": 0.392,
+   "median_latency_ms": 130.3,
+   "p95_latency_ms": 548.3,
+   "cost_per_1k_msgs_usd": 0.0127,
+   "confusion": [
+    [20, 0, 0, 0, 0, 0],
+    [5, 14, 1, 0, 0, 0],
+    [2, 2, 16, 0, 0, 0],
+    [9, 8, 2, 1, 0, 0],
+    [8, 4, 1, 2, 5, 0],
+    [17, 1, 0, 0, 0, 0]
+   ]
+  },
+  "finetuned": {
+   "model": "Qwen2.5-1.5B fine-tuned (LoRA)",
+   "accuracy": 0.9417,
+   "macro_f1": 0.9383,
+   "median_latency_ms": 220.3,
+   "p95_latency_ms": 306.6,
+   "cost_per_1k_msgs_usd": 0.0214,
+   "confusion": [
+    [20, 0, 0, 0, 0, 0],
+    [0, 20, 0, 0, 0, 0],
+    [0, 0, 20, 0, 0, 0],
+    [1, 2, 2, 14, 1, 0],
+    [0, 0, 0, 0, 19, 1],
+    [0, 0, 0, 0, 0, 20]
+   ],
+   "train_minutes_t4": 2.9
+  }
+ },
+ "labels": ["order_tracking", "order_action", "product_question", "policy_question", "escalation", "chit_chat"],
+ "still_wrong": [
+  ["Does Black Friday include the Pine Pro range?", "policy_question", "product_question"],
+  ["if i order on thursday evening with express when will it come", "policy_question", "order_tracking"],
+  ["Can bedding be returned if I've opened the packet", "policy_question", "order_action"],
+  ["is your packaging plastic free", "policy_question", "product_question"],
+  ["what number can i ring you on", "policy_question", "escalation"],
+  ["Can I add an item to an order I already placed?", "policy_question", "order_action"],
+  ["manager please. now.", "escalation", "chit_chat"]
+ ]
+}
