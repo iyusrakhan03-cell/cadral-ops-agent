@@ -7,9 +7,7 @@ __pycache__/
 *.pyc
 .venv/
 .pytest_cache/
-# local data / build outputs
-backend/data/*.db
-backend/index/
+# local build outputs (the SQLite demo DB and search index ARE committed so the repo works out of the box)
 .fastembed_cache/
 *.log
 # node

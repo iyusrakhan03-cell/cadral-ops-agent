@@ -1,3 +1,5 @@
 * text=auto eol=lf
 *.pdf binary
 *.ipynb text eol=lf
+*.db binary
+*.npy binary

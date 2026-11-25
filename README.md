@@ -13,11 +13,15 @@ python -m venv .venv && .venv/Scripts/activate      # macOS/Linux: source .venv/
 pip install -r requirements.txt
 cp ../.env.example ../.env                           # add GROQ_API_KEY
 
-python -m scripts.render_pdfs      # policy Markdown -> real PDFs
-python -m scripts.seed_db          # shop database (SQLite locally, Postgres via DATABASE_URL)
-python -m scripts.build_index      # chunk + embed 22 documents
+# The demo database (backend/data/local.db) and search index (backend/index/) are committed,
+# so you can ask questions straight away. Embedding/reranker models (~150 MB) download on first run.
 python -m scripts.ask "how much is express delivery?"
 python -m scripts.eval_rag         # retrieval + answer evaluation
+
+# Only needed after you change the documents or want fresh demo data:
+python -m scripts.render_pdfs      # policy Markdown -> real PDFs
+python -m scripts.build_index      # re-chunk + re-embed the documents
+python -m scripts.seed_db          # recreate the shop database (dates are relative to today)
 ```
 
 ## Repo layout
