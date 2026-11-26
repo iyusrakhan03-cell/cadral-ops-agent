@@ -14,8 +14,9 @@ from ..config import get_settings
 from ..llm import LLMResult, chat
 from .index import SearchResult, get_index
 
-IDK_MESSAGE = ("I'm sorry, I don't know the answer to that — I couldn't find it in our help documents. "
-               "I can pass your question to a member of our team if you'd like.")
+IDK_MESSAGE = ("That's a good question, but I don't have a reliable answer for it, and I'd rather not guess. "
+               "Our customer care team can help: email support@thistleandpine.co.uk or call 0113 496 0321 "
+               "(Mon–Fri 9am–6pm, Sat 10am–4pm). Is there anything else I can help you with?")
 
 SYSTEM_PROMPT = """You are the customer support assistant for Thistle & Pine, a UK online homeware shop.
 Answer the customer's question using ONLY the numbered sources provided.
