@@ -244,6 +244,15 @@ cd dashboard && npm install && npm run dev
 - **Dashboard:** new **Daily report** page; **Settings** now shows a **Channels & deliveries** panel (what's connected, what's waiting, recent sends, errors).
 - Tested locally end to end: a fake email and a fake Telegram message through the real relay, duplicates ignored, wrong key refused, replies queued with sources listed, failed sends kept for retry.
 
+### Day 4: hosting change (Hugging Face Docker Spaces are no longer free)
+Hugging Face now needs a paid PRO plan ($9/month) for Docker Spaces, so the backend runs **on the project owner's PC**:
+- `deployun_live.ps1` starts it, and **Tailscale Funnel** (free) publishes it at a permanent address:
+  `https://houstonelectronics.tail550dc0.ts.net` (health check: `/api/health`).
+- The demo is online only while that PC is on, awake and connected. Set Windows sleep to "Never" while plugged in.
+- Vercel `NEXT_PUBLIC_API_URL` points at that address. The Telegram relay and the Gmail bridge use it too.
+- `deploy/deploy_backend.py` and `deploy/hf-space/` still work for a paid Space or a future move.
+- The database is the PC's `backend/data/local.db`; the HF-dataset backup is switched off.
+
 ### Day 4: going live (accounts the project owner must create; all free)
 1. **Hugging Face token** (write access) → `HF_TOKEN` in `.env`. Also set `DASHBOARD_URL`, `ADMIN_PASSWORD`, `AGENT_PASSWORD`, `MANAGER_EMAIL`.
 2. **Slack:** api.slack.com/apps → Create app → Incoming Webhooks → add to a channel → `SLACK_WEBHOOK_URL` in `.env`.

@@ -46,12 +46,9 @@ if env.get("DASHBOARD_URL") and not env.get("CORS_ORIGINS"):
     generated["CORS_ORIGINS"] = f"{env['DASHBOARD_URL'].rstrip('/')},http://localhost:3000"
 if generated:
     with ENV_FILE.open("a", encoding="utf-8") as f:
-        f.write("
-# --- added by deploy/deploy_backend.py ---
-")
+        f.write("\n# --- added by deploy/deploy_backend.py ---\n")
         for k, v in generated.items():
-            f.write(f"{k}={v}
-")
+            f.write(f"{k}={v}\n")
             print(f"generated {k} (saved to .env)")
     env.update(generated)
 
