@@ -60,6 +60,24 @@ class Settings(BaseSettings):
     agent_password: str = "agent-demo-123"
     warmup_models: bool = True           # load search + router models at startup so the first chat is fast
 
+    # --- Channels & automation (Day 4) ---
+    # Shared secret for our own bridges (Gmail Apps Script, Vercel Telegram relay). Blank = channel endpoints off.
+    bridge_key: str = ""
+    # The dashboard's URL on Vercel; Telegram messages go out through its /api/telegram/send relay, because
+    # Hugging Face Spaces can't reach api.telegram.org directly.
+    relay_url: str = ""
+    slack_webhook_url: str = ""          # Slack "Incoming Webhook" URL: escalations, system errors, daily report
+    manager_email: str = ""              # who receives the daily management report
+    report_hour: int = 8                 # daily report goes out at/after this hour...
+    report_timezone: str = "Europe/London"   # ...in the shop's time zone
+    dashboard_url: str = ""              # links in Slack alerts / the report point here
+    workers: bool = True                 # background delivery + inbound + report workers (off in evals/tests)
+
+    # --- Database backup to a private Hugging Face dataset (free hosting has no permanent disk) ---
+    hf_token: str = ""
+    db_backup_repo: str = ""             # e.g. <hf-user>/thistle-pine-data (private dataset). Blank = off.
+    db_backup_every_s: int = 300
+
     @property
     def use_pinecone(self) -> bool:
         return self.vector_store == "pinecone" or (self.vector_store == "auto" and bool(self.pinecone_api_key))

@@ -60,7 +60,7 @@ def _usage(calls: list[LLMResult], latency_ms: float) -> dict:
 def get_or_create_conversation(s, conversation_id: str | None, channel: str, customer_email: str | None,
                                external_ref: str | None, subject: str | None) -> Conversation:
     conv = s.get(Conversation, conversation_id) if conversation_id else None
-    if conv is None and external_ref:
+    if conv is None and external_ref and not conversation_id:   # a given new id means "start a new thread"
         conv = s.query(Conversation).filter_by(channel=channel, external_ref=external_ref).first()
     if conv is None:
         conv = Conversation(channel=channel, external_ref=external_ref, subject=subject)

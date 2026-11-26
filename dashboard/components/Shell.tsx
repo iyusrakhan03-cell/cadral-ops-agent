@@ -15,6 +15,7 @@ const NAV: { href: string; label: string; badge?: keyof Counts; admin?: boolean 
   { href: "/refunds", label: "Refund approvals", badge: "pending_refunds", admin: true },
   { href: "/analytics", label: "Analytics" },
   { href: "/learning", label: "What the AI learned" },
+  { href: "/reports", label: "Daily report" },
   { href: "/settings", label: "Settings", admin: true },
 ];
 

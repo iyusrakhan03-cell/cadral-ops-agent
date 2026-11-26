@@ -18,4 +18,5 @@ RUN mkdir -p backend/models backend/.fastembed_cache && chown -R user /app
 USER user
 WORKDIR /app/backend
 EXPOSE 7860
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "7860"]
+# Restore the latest database backup (private HF dataset) before starting — free Spaces have no permanent disk.
+CMD ["sh", "-c", "python -m app.backup restore; exec uvicorn app.main:app --host 0.0.0.0 --port 7860"]

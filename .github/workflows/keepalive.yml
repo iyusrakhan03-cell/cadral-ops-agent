@@ -1,0 +1,17 @@
+# Backup keep-alive for the free Hugging Face Space (which sleeps after 48 h without traffic).
+# The Gmail bridge already calls the API every minute; this covers the case where the bridge is paused.
+name: keep-alive
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping the API
+        env:
+          API_URL: ${{ vars.API_URL }}
+        run: |
+          if [ -z "$API_URL" ]; then echo "Set the repository variable API_URL"; exit 0; fi
+          curl -fsS --retry 3 --max-time 60 "$API_URL/api/health" || echo "API not answering (it may be waking up)"

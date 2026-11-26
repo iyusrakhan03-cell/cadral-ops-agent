@@ -20,6 +20,7 @@ Staff side (login; roles admin | agent):
 from __future__ import annotations
 
 import asyncio
+import hmac
 import json
 import logging
 import re
@@ -28,7 +29,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import Literal
 
-from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, Header, HTTPException, Query
 from fastapi.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse, StreamingResponse
@@ -70,7 +71,11 @@ async def lifespan(_: FastAPI):
     seed_staff()
     if get_settings().warmup_models:
         threading.Thread(target=_warmup, daemon=True).start()
+    from . import backup, channels
+    channels.start_workers()     # email/Telegram inbound, outbox delivery + retries, daily report
+    backup.start()               # free hosting: snapshot the database to a private HF dataset
     yield
+    backup.stop()
 
 
 app = FastAPI(title="Thistle & Pine Operations API", version="0.3.0", lifespan=lifespan)
@@ -575,4 +580,119 @@ def health():
     from .llm import model_status
     with SessionLocal() as s:
         s.query(Conversation.id).limit(1).all()
-    return {"ok": True, "models_cooling_down": model_status(), "groq_key_set": bool(get_settings().groq_api_key)}
+    from .channels import status as channel_status
+    return {"ok": True, "models_cooling_down": model_status(), "groq_key_set": bool(get_settings().groq_api_key),
+            "channels": channel_status()}
+
+
+# ====================================================================== channels: email + Telegram (Day 4)
+def bridge_auth(x_bridge_key: str = Header(default="")) -> None:
+    """Our own bridges (Gmail Apps Script, Vercel Telegram relay) prove themselves with a shared secret."""
+    key = get_settings().bridge_key
+    if not key:
+        raise HTTPException(503, "channels are not configured (BRIDGE_KEY)")
+    if not hmac.compare_digest(x_bridge_key.encode(), key.encode()):
+        raise HTTPException(401, "bad bridge key")
+
+
+class EmailIn(BaseModel):
+    message_id: str = Field(min_length=1, max_length=200)
+    thread_id: str = Field(min_length=1, max_length=200)
+    from_: str = Field(alias="from", min_length=3, max_length=200)
+    from_name: str | None = Field(default=None, max_length=200)
+    subject: str | None = Field(default=None, max_length=500)
+    body: str = Field(default="", max_length=50_000)
+
+
+@app.post("/api/channels/email/inbound", dependencies=[Depends(bridge_auth)])
+def email_inbound(body: EmailIn):
+    from .channels import accept_inbound
+    payload = body.model_dump(by_alias=True)
+    payload["from"] = payload["from"].strip().lower()
+    ev_id, new = accept_inbound("email", body.message_id, payload)
+    return {"accepted": True, "event_id": ev_id, "duplicate": not new}
+
+
+@app.get("/api/channels/email/outbox", dependencies=[Depends(bridge_auth)])
+def email_outbox(limit: int = Query(10, ge=1, le=50)):
+    from .channels import claim_emails
+    return {"emails": claim_emails(limit)}
+
+
+class AckIn(BaseModel):
+    ok: bool
+    error: str | None = Field(default=None, max_length=2000)
+
+
+@app.post("/api/channels/email/outbox/{outbox_id}/ack", dependencies=[Depends(bridge_auth)])
+def email_ack(outbox_id: int, body: AckIn):
+    from .channels import ack_email
+    if not ack_email(outbox_id, body.ok, body.error):
+        raise HTTPException(404, "outbox item not found")
+    return {"ok": True}
+
+
+class TelegramIn(BaseModel):
+    update_id: int
+    chat_id: int
+    text: str = Field(min_length=1, max_length=4096)
+    first_name: str | None = None
+    last_name: str | None = None
+    username: str | None = None
+
+
+@app.post("/api/channels/telegram/inbound", dependencies=[Depends(bridge_auth)])
+def telegram_inbound(body: TelegramIn):
+    from .channels import accept_inbound
+    ev_id, new = accept_inbound("telegram", str(body.update_id), body.model_dump())
+    return {"accepted": True, "event_id": ev_id, "duplicate": not new}
+
+
+@app.get("/api/channels/ping", dependencies=[Depends(bridge_auth)])
+def bridge_ping():
+    """The Gmail bridge calls this every minute: proves the key works and keeps the free Space awake."""
+    return {"ok": True}
+
+
+@app.get("/api/channels/status")
+def channels_status(_: User = Depends(current_user)):
+    from .channels import status as channel_status
+    from .models import Outbox
+    with SessionLocal() as s:
+        recent = s.query(Outbox).order_by(Outbox.id.desc()).limit(25).all()
+        items = [{"id": o.id, "channel": o.channel, "kind": o.kind, "status": o.status, "attempts": o.attempts,
+                  "target": o.target if o.channel != "slack" else "slack", "last_error": o.last_error,
+                  "conversation_id": o.conversation_id, "created_at": _iso(o.created_at), "sent_at": _iso(o.sent_at)}
+                 for o in recent]
+    return {**channel_status(), "recent": items}
+
+
+# ====================================================================== daily management report
+def _parse_day(day: str | None):
+    if not day:
+        return None
+    try:
+        return datetime.strptime(day, "%Y-%m-%d").date()
+    except ValueError:
+        raise HTTPException(422, "date must be YYYY-MM-DD")
+
+
+@app.get("/api/reports/daily")
+def daily_report(date: str | None = None, _: User = Depends(current_user)):
+    from . import report
+    d = report.build(_parse_day(date))
+    return {"data": d, "html": report.to_html(d), "text": report.to_text(d),
+            "manager_email_set": bool(get_settings().manager_email)}
+
+
+class ReportSendIn(BaseModel):
+    date: str | None = None
+    to: str | None = Field(default=None, max_length=200)
+
+
+@app.post("/api/reports/daily/send")
+def send_daily_report(body: ReportSendIn, _: User = Depends(require_admin)):
+    from . import report
+    if not (body.to or get_settings().manager_email or get_settings().slack_webhook_url):
+        raise HTTPException(409, "Set MANAGER_EMAIL or SLACK_WEBHOOK_URL on the server first")
+    return report.send(_parse_day(body.date), to=body.to)

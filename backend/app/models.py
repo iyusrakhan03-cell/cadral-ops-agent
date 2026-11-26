@@ -229,3 +229,41 @@ class Setting(Base):
     __tablename__ = "settings"
     key: Mapped[str] = mapped_column(String(60), primary_key=True)
     value: Mapped[str] = mapped_column(Text)
+
+
+# ====================================================================== channels: nothing lost in or out
+class InboundEvent(Base):
+    """Every message arriving from an outside channel (email, Telegram) is written here FIRST, then processed.
+    The unique (channel, external_id) makes re-deliveries harmless: Gmail/Telegram retries are ignored, and
+    anything still 'received' after a crash or restart is picked up again by the worker."""
+    __tablename__ = "inbound_events"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    channel: Mapped[str] = mapped_column(String(20))
+    external_id: Mapped[str] = mapped_column(String(200), unique=True, index=True)   # "<channel>:<message id>"
+    payload: Mapped[dict] = mapped_column(JSON)
+    status: Mapped[str] = mapped_column(String(20), default="received", index=True)  # received | done | failed
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    error: Mapped[str | None] = mapped_column(Text)
+    conversation_id: Mapped[str | None] = mapped_column(String(12))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+    processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class Outbox(Base):
+    """Everything we must deliver to the outside world: replies to email/Telegram customers, Slack alerts,
+    the daily report email. Rows stay 'pending' until the channel confirms delivery; failures retry with
+    back-off, and after MAX_ATTEMPTS the row is marked failed and staff are alerted."""
+    __tablename__ = "outbox"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    channel: Mapped[str] = mapped_column(String(20), index=True)          # email | telegram | slack
+    kind: Mapped[str] = mapped_column(String(20), default="reply")       # reply | alert | report
+    message_id: Mapped[int | None] = mapped_column(ForeignKey("messages.id"), unique=True)
+    conversation_id: Mapped[str | None] = mapped_column(String(12))
+    target: Mapped[str | None] = mapped_column(String(300))              # email address / chat id / webhook
+    payload: Mapped[dict] = mapped_column(JSON)
+    status: Mapped[str] = mapped_column(String(20), default="pending", index=True)  # pending | sent | failed
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    last_error: Mapped[str | None] = mapped_column(Text)
+    next_attempt_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+    sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

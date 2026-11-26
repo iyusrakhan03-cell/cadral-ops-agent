@@ -29,10 +29,10 @@ We made up a shop called **Thistle & Pine**, an online homeware store (pans, bed
 | 2 | **Advanced RAG**: 20+ docs (PDF, web pages, product CSV), keyword + vector search, reranking, citations, says "I don't know" | ✅ Done |
 | 3 | **Fine-tune a small model (1–3B)**, compare it with the base model, and explain when to use fine-tuning vs RAG vs a big API model | ✅ Mostly done: trained, compared, and live in the app. Still owed: the "big model" comparison run, plus the written explanation on Day 5 |
 | 4 | **Self-improving loop**: human edits/rejects a reply, it's saved and used to improve future answers | ✅ Day 3: Approve/Edit/Reject in the dashboard; corrections feed the Support agent and export as a re-training set |
-| 5 | **Automation**: 2+ channels (email + web chat or Telegram), daily management report by email, Slack alerts, retries so nothing is lost | 🟡 Retries and "never lose a message" are done. Channels, daily report and Slack are Day 4 (the alert functions exist but only log for now) |
-| 6 | **Dashboard**: login with roles (admin/agent), live chat view with streaming, agent trace, approve/edit/reject, analytics | ✅ Day 3 (runs locally; deployed on Day 4) |
+| 5 | **Automation**: 2+ channels (email + web chat or Telegram), daily management report by email, Slack alerts, retries so nothing is lost | ✅ Day 4 code done: email (Gmail bridge), Telegram (Vercel relay), Slack alerts, daily report, inbox/outbox with retries. Needs the accounts connected (section "Day 4: going live") |
+| 6 | **Dashboard**: login with roles (admin/agent), live chat view with streaming, agent trace, approve/edit/reject, analytics | ✅ Day 3. Dashboard live on Vercel; backend goes live with `deploy/deploy_backend.py` |
 | 7 | **Evals & monitoring**: 50+ test messages, one command gives a score, track cost and latency per request | ✅ Done: 102 tests, one command. Official final run still to do |
-| 8 | **Deployment**: live, Dockerised, secrets in environment variables | ❌ Day 4. Secrets are already in env vars |
+| 8 | **Deployment**: live, Dockerised, secrets in environment variables | 🟡 Dashboard on Vercel ✅. Backend Docker image + one-command deploy to Hugging Face Spaces ready, not yet run |
 
 ---
 
@@ -105,12 +105,14 @@ message arrives → saved to database first (never lost)
 | **Qwen2.5-1.5B (ours)** | The Router's brain | Runs locally via `llama-cpp-python` |
 | **Google Colab** | Free GPU, used for training | Notebook in `finetune/` |
 | **Hugging Face** | Hosts our trained model | `iyusrakhan/tp-router-qwen2.5-1.5b-gguf` (and `-lora`) |
-| **SQLite now → Supabase (Postgres) later** | The shop database | Set by `DATABASE_URL`; blank = local file |
-| **GitHub** | Code | Private repo `iyusrakhan03-cell/cadral-ops-agent`. Ask the project owner to add you as a collaborator |
-| Planned: **Vercel** | Hosts the dashboard (Next.js) | Day 3–4 |
-| Planned: **Hugging Face Spaces (Docker)** | Hosts the backend | Day 4 |
-| Planned: **Slack webhook, Telegram bot, Gmail** | Alerts and extra channels | Day 4 |
-| Planned: **GitHub Actions cron** | Daily management report email | Day 4 |
+| **SQLite + backup to a private HF dataset** | The shop database | Free Spaces can't reach Postgres ports, so no Supabase. `DATABASE_URL` still switches to Postgres on another host |
+| **GitHub** | Code | Public repo `iyusrakhan03-cell/cadral-ops-agent`. Ask the project owner to add you as a collaborator to push |
+| **Vercel** | Hosts the dashboard + the Telegram relay | `thistle-pine-dashboard.vercel.app` |
+| **Hugging Face Spaces (Docker)** | Hosts the backend | `deploy/deploy_backend.py` |
+| **Gmail + Google Apps Script** | Email channel + sends the daily report | `channels/gmail-bridge/` |
+| **Telegram bot** | Second chat channel | `deploy/set_telegram_webhook.py` |
+| **Slack incoming webhook** | Staff alerts + daily summary | `SLACK_WEBHOOK_URL` |
+| **GitHub Actions** | Backup keep-alive ping | `.github/workflows/keepalive.yml` |
 
 **Keys and secrets:**
 - They live only in a file called `.env` in the project folder. Git ignores it, and it must **never** be committed.
@@ -223,16 +225,38 @@ cd dashboard && npm install && npm run dev
 - [ ] **Review mode setting:** `auto` / `smart` (hold low-confidence replies for review) / `all`. This already exists in `handle_turn(review_mode=...)`.
 
 ### Day 4: channels, automation, deployment
-- [ ] **Email channel** (Gmail IMAP polling or a webhook) and a **Telegram bot**. Both call `handle_turn(channel=..., external_ref=...)`.
-- [ ] **Slack:** make `backend/app/notify.py` post to a Slack incoming webhook for escalations and system errors.
-- [ ] **Daily management report:**
-  - Contents: volume, top issues, refunds issued, AI accuracy.
-  - Sent by email from a GitHub Actions scheduled job that calls a backend endpoint.
-- [ ] **Retries / never lose a message:**
-  - Inbound messages are already saved first.
-  - Add a small "outbox / retry" job so failed turns and failed email or Slack sends are retried.
-- [ ] **Docker:** a Dockerfile for the backend, deployed to Hugging Face Spaces (Docker). Move the database to **Supabase** with `DATABASE_URL`. Dashboard on **Vercel**.
-- [ ] A GitHub Actions job that pings the backend so the free Space doesn't sleep.
+**Code: done ✅.** What was built, in plain words:
+- **The free-hosting problem:** a free Hugging Face Space can only make normal web requests (ports 80/443). Gmail's mail ports, Postgres
+  ports and even `api.telegram.org` are blocked there. So each channel gets a tiny free "bridge":
+  - **Email** → a Google Apps Script inside the shop's Gmail (`channels/gmail-bridge/`). Every minute it hands new emails to the API
+    and sends the AI's replies from Gmail, in the same thread.
+  - **Telegram** → two small routes on the Vercel dashboard (`dashboard/app/api/telegram/`): webhook in, send out.
+  - **Database** → stays SQLite. It is downloaded from a private HF dataset on start and uploaded every 5 minutes when something changed (`backend/app/backup.py`).
+- **Never lose a message** (`backend/app/channels.py`):
+  - Every incoming email or Telegram message is saved first (`inbound_events`, de-duplicated by message id), then answered by the same agents as web chat.
+  - Every reply to send sits in an `outbox` and is retried with back-off (10 s → 1 h, 8 tries) until the channel confirms. After that it's marked failed and Slack is alerted.
+  - Approved, edited and human-written replies (dashboard) and refund decisions go out the same way, on every channel.
+- **Slack** (`backend/app/notify.py`): escalations (with severity, summary and a link to the conversation), system errors (at most one every 10 min per source), and the daily summary.
+- **Daily management report** (`backend/app/report.py`):
+  - Contents: yesterday's conversations by channel, % solved by AI alone, reply speed, refunds issued (£, automatic vs approved), new escalations, topics, review stats, AI cost.
+  - It also lists what needs attention now: open escalations, refunds waiting for approval, replies to review, failed deliveries.
+  - Sent at 8am UK time by the server itself (no cron needed). The dashboard has a **Daily report** page with a preview and "Send now".
+- **Dashboard:** new **Daily report** page; **Settings** now shows a **Channels & deliveries** panel (what's connected, what's waiting, recent sends, errors).
+- Tested locally end to end: a fake email and a fake Telegram message through the real relay, duplicates ignored, wrong key refused, replies queued with sources listed, failed sends kept for retry.
+
+### Day 4: going live (accounts the project owner must create; all free)
+1. **Hugging Face token** (write access) → `HF_TOKEN` in `.env`. Also set `DASHBOARD_URL`, `ADMIN_PASSWORD`, `AGENT_PASSWORD`, `MANAGER_EMAIL`.
+2. **Slack:** api.slack.com/apps → Create app → Incoming Webhooks → add to a channel → `SLACK_WEBHOOK_URL` in `.env`.
+3. Run `backend/.venv/Scripts/python deploy/deploy_backend.py`. It generates the secret keys, creates the Space and the private backup dataset, and prints the API URL. Wait about 10 minutes for the first build, then open `<API URL>/api/health`.
+4. **Vercel** → project → Settings → Environment Variables:
+   - `NEXT_PUBLIC_API_URL` = the API URL
+   - `BRIDGE_KEY` = from `.env`
+   - `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` (step 5)
+
+   Then **redeploy**. (Right now the live dashboard still points at `localhost:8000`, so logins fail for anyone else.)
+5. **Telegram:** @BotFather → `/newbot` → `TELEGRAM_BOT_TOKEN` in `.env` → run `deploy/set_telegram_webhook.py`. It adds `TELEGRAM_WEBHOOK_SECRET` to `.env`; copy both into Vercel.
+6. **Gmail:** a new Gmail for the shop → follow `channels/gmail-bridge/README.md` (5 minutes).
+7. GitHub → repo → Settings → Secrets and variables → Actions → **Variables** → `API_URL` = the API URL (backup keep-alive).
 
 ### Day 5: polish and submit
 - [ ] README with an **architecture diagram** and setup steps.
@@ -274,8 +298,8 @@ cd dashboard && npm install && npm run dev
 >
 > Next tasks, in order:
 > 1. Official full eval run and `python finetune/compare_api.py`.
-> 2. Day 3: a FastAPI server with streaming chat (SSE), role-based login (admin/agent), and endpoints for conversations, traces, escalations, refund approvals, analytics and approve/edit/reject (writing to the `feedback` table). Plus a Next.js dashboard for Vercel showing live conversations, the agent trace, approve/edit/reject, an escalations queue, refund approvals, analytics (auto-resolution %, response time, cost per conversation, accuracy over time) and a customer web-chat widget.
-> 3. Day 4: email and Telegram channels; Slack alerts in `app/notify.py`; a daily management report email via a GitHub Actions cron; a retry/outbox job; a backend Dockerfile deployed to Hugging Face Spaces; Supabase Postgres; a keep-alive ping.
+> 2. (done) Day 3: a FastAPI server with streaming chat (SSE), role-based login (admin/agent), and endpoints for conversations, traces, escalations, refund approvals, analytics and approve/edit/reject (writing to the `feedback` table). Plus a Next.js dashboard for Vercel showing live conversations, the agent trace, approve/edit/reject, an escalations queue, refund approvals, analytics (auto-resolution %, response time, cost per conversation, accuracy over time) and a customer web-chat widget.
+> 3. Day 4 (code done): connect the accounts per HANDOVER.md "Day 4: going live", then test email, Telegram, Slack and the daily report on the live system.
 > 4. Day 5: README with an architecture diagram, the write-up, and the demo-video script.
 >
 > Explain what you're doing in plain English as you go. The project owner prefers simple, non-technical explanations.

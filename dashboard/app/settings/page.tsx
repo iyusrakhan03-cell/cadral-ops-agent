@@ -4,6 +4,53 @@ import Shell from "@/components/Shell";
 import { api, put } from "@/lib/api";
 
 interface S { review_mode: string; review_modes: Record<string, string> }
+interface OutRow { id: number; channel: string; kind: string; status: string; attempts: number; target: string | null;
+  last_error: string | null; created_at: string; sent_at: string | null }
+interface Ch { inbound_waiting: number; inbound_failed: number; outbox_pending: number; outbox_failed: number;
+  email_bridge: boolean; telegram_relay: boolean; slack: boolean; daily_report_to: boolean; recent: OutRow[] }
+
+function Channels() {
+  const [c, setC] = useState<Ch | null>(null);
+  const [err, setErr] = useState("");
+  useEffect(() => {
+    const load = () => api<Ch>("/api/channels/status").then(setC).catch((e) => setErr(e.message));
+    load();
+    const t = setInterval(load, 10000);
+    return () => clearInterval(t);
+  }, []);
+  const on = (b: boolean) => <span className="pill">{b ? "✓ connected" : "not set up"}</span>;
+  return (
+    <div className="card card-pad stack" style={{ maxWidth: 900, marginTop: 16 }}>
+      <h2>Channels &amp; deliveries</h2>
+      {err && <div className="error">{err}</div>}
+      {c && (<>
+        <div className="row" style={{ gap: 16 }}>
+          <span>Email (Gmail bridge) {on(c.email_bridge)}</span>
+          <span>Telegram {on(c.telegram_relay)}</span>
+          <span>Slack alerts {on(c.slack)}</span>
+          <span>Daily report email {on(c.daily_report_to)}</span>
+        </div>
+        <div className="faint">
+          Waiting to process: {c.inbound_waiting} · waiting to send: {c.outbox_pending} · failed: {c.outbox_failed + c.inbound_failed}.
+          Nothing is dropped: messages are saved first and sends are retried (10 s → 1 h) until the channel confirms.
+        </div>
+        <table className="table">
+          <thead><tr><th>#</th><th>Channel</th><th>What</th><th>To</th><th>Status</th><th className="num">Tries</th><th>Last error</th></tr></thead>
+          <tbody>
+            {c.recent.map((o) => (
+              <tr key={o.id}>
+                <td>{o.id}</td><td>{o.channel}</td><td>{o.kind}</td><td className="mono">{o.target || ""}</td>
+                <td><span className="pill">{o.status}</span></td><td className="num">{o.attempts}</td>
+                <td className="faint">{o.last_error || ""}</td>
+              </tr>
+            ))}
+            {!c.recent.length && <tr><td colSpan={7} className="faint">Nothing sent yet.</td></tr>}
+          </tbody>
+        </table>
+      </>)}
+    </div>
+  );
+}
 
 function Settings() {
   const [s, setS] = useState<S | null>(null);
@@ -37,6 +84,7 @@ function Settings() {
           {saved && <span className="faint" style={{ color: "var(--good-ink)" }}>✓ {saved}</span>}
         </div>
       )}
+      <Channels />
     </>
   );
 }
