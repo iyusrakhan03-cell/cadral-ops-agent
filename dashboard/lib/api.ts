@@ -1,5 +1,7 @@
 // Thin client for the FastAPI backend (backend/app/main.py).
-export const API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/\/$/, "");
+const RAW_API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/\/$/, "");
+// Deployed: same-origin "/backend", which Vercel forwards to the API (see next.config.mjs). Local dev: call it directly.
+export const API_URL = RAW_API_URL.includes("localhost") ? RAW_API_URL : "/backend";
 const TOKEN_KEY = "tp_token";
 const USER_KEY = "tp_user";
 
