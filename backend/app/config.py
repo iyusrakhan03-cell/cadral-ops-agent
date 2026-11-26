@@ -34,6 +34,19 @@ class Settings(BaseSettings):
     # Calibrated on data/eval_rag_qa.jsonl with scripts/eval_rag.py.
     rag_min_score: float = -5.0
 
+    # --- Vector database (Pinecone serverless, free Starter plan) ---
+    pinecone_api_key: str = ""
+    pinecone_index: str = "thistle-pine-kb"
+    pinecone_namespace: str = "kb"
+    pinecone_cloud: str = "aws"
+    pinecone_region: str = "us-east-1"   # the only region on the free Starter plan
+    vector_store: str = "auto"           # auto = Pinecone if a key is set, else local | pinecone | local
+    hybrid_alpha: float = 0.5            # 1.0 = meaning only, 0.0 = keywords only
+
+    @property
+    def use_pinecone(self) -> bool:
+        return self.vector_store == "pinecone" or (self.vector_store == "auto" and bool(self.pinecone_api_key))
+
     @property
     def db_url(self) -> str:
         if self.database_url:

@@ -42,8 +42,10 @@ def main():
 
     hits, rr, pos_scores, neg_scores, misses = 0, [], [], [], []
     answerable = [r for r in rows if r["answerable"]]
+    backends: dict[str, int] = {}
     for r in rows:
         res = idx.search(r["question"])
+        backends[res.backend] = backends.get(res.backend, 0) + 1
         if not r["answerable"]:
             neg_scores.append(res.top_score)
             continue
@@ -58,6 +60,7 @@ def main():
             misses.append((r["id"], r["question"], r["source"], [h.chunk.doc for h in res.hits[:3]]))
 
     print(f"\n== Retrieval ({len(answerable)} answerable, {len(neg_scores)} unanswerable)")
+    print(f"backend: {backends}")
     print(f"hit@{s.rag_top_k}: {hits}/{len(answerable)} = {hits / len(answerable):.1%}   MRR: {statistics.mean(rr):.3f}")
     for m in misses:
         print("  MISS", m)

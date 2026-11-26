@@ -54,6 +54,8 @@ class AnswerResult:
         return {
             "idk": self.idk, "idk_reason": self.idk_reason,
             "retrieval": {
+                "backend": self.retrieval.backend if self.retrieval else None,
+                "fallback_reason": self.retrieval.error if self.retrieval else None,
                 "top_score": round(self.retrieval.top_score, 3) if self.retrieval else None,
                 "threshold": get_settings().rag_min_score,
                 "timings_ms": self.retrieval.timings_ms if self.retrieval else {},

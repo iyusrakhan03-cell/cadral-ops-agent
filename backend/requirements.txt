@@ -17,3 +17,4 @@ numpy<2.1
 # --- Tooling ---
 fpdf2==2.8.2
 python-dotenv==1.0.1
+pinecone==10.3.0
