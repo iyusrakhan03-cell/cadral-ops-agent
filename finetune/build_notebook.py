@@ -57,6 +57,12 @@ else:
 load = lambda n: [json.loads(l) for l in (DATA / f"{n}.jsonl").read_text().splitlines() if l.strip()]
 train, val, test = load("train"), load("val"), load("test")
 print(len(train), len(val), len(test))
+
+from google.colab import userdata
+try:
+    assert userdata.get("HF_TOKEN"); print("✅ HF_TOKEN found — the trained model will be saved to Hugging Face")
+except Exception:
+    raise SystemExit("❌ Add HF_TOKEN in the Colab 🔑 Secrets sidebar (and switch on 'Notebook access') before running")
 """)
 
 md("## 2. Prompt + evaluation helpers")
@@ -198,20 +204,28 @@ for t, gold, p in still_wrong: print(f"  [{gold} -> {p}] {t}")
 json.dump({"results": results, "still_wrong": still_wrong}, open("finetune_results.json", "w"), indent=1)
 """)
 
-md("## 8. Save the model (GGUF for CPU serving in the backend) and download results")
+md("## 8. Save the model to Hugging Face and download results")
 code("""
-model.save_pretrained("router-lora"); tokenizer.save_pretrained("router-lora")
-model.save_pretrained_gguf("router-gguf", tokenizer, quantization_method="q4_k_m")
+from google.colab import files, userdata
+files.download("finetune_results.json")          # results first, so you have them even if an upload fails
+
+HF_TOKEN = userdata.get("HF_TOKEN")               # Colab 🔑 sidebar -> HF_TOKEN (a *write* token)
+from huggingface_hub import HfApi
+user = HfApi().whoami(token=HF_TOKEN)["name"]
+print("Hugging Face user:", user)
+
+# 1) Small LoRA adapter (~70 MB) — fast and reliable backup copy.
+lora_repo = f"{user}/tp-router-qwen2.5-1.5b-lora"
+model.push_to_hub(lora_repo, token=HF_TOKEN); tokenizer.push_to_hub(lora_repo, token=HF_TOKEN)
+print("✅ LoRA adapter:", "https://huggingface.co/" + lora_repo)
+
+# 2) Quantised GGUF (~1 GB) — what the backend runs on CPU. Takes ~5-10 min (builds llama.cpp).
+gguf_repo = f"{user}/tp-router-qwen2.5-1.5b-gguf"
 try:
-    HF_TOKEN = userdata.get("HF_TOKEN")
-except Exception:
-    HF_TOKEN = None
-if HF_TOKEN:
-    HF_REPO = "your-hf-username/tp-router-qwen2.5-1.5b"   # <- change
-    model.push_to_hub_gguf(HF_REPO, tokenizer, quantization_method="q4_k_m", token=HF_TOKEN)
-    print("pushed to https://huggingface.co/" + HF_REPO)
-from google.colab import files
-files.download("finetune_results.json")
+    model.push_to_hub_gguf(gguf_repo, tokenizer, quantization_method="q4_k_m", token=HF_TOKEN)
+    print("✅ GGUF model:", "https://huggingface.co/" + gguf_repo)
+except Exception as e:
+    print("⚠️ GGUF upload failed (the LoRA adapter above is still saved):", repr(e)[:300])
 """)
 
 nb = {"cells": cells, "metadata": {"accelerator": "GPU", "colab": {"provenance": [], "gpuType": "T4"},
