@@ -18,3 +18,6 @@ numpy<2.1
 fpdf2==2.8.2
 python-dotenv==1.0.1
 pinecone==10.3.0
+# --- Fine-tuned router (CPU). Prebuilt wheels: pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu ---
+llama-cpp-python==0.3.38
+huggingface_hub

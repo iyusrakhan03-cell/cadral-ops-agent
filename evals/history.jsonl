@@ -1,0 +1,1 @@
+{"suite": "agents", "timestamp": "2026-11-26T07:57:21+00:00", "cases": 62, "passed": 57, "score": 0.9194, "routing_accuracy": 0.95, "total_cost_usd": 0.01808, "latency_ms_p50": 6830}

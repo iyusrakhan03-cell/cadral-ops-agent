@@ -16,3 +16,6 @@ node_modules/
 # finetune artefacts
 finetune/outputs/
 finetune/*.gguf
+backend/data/eval.db
+backend/models/
+evals/*.log

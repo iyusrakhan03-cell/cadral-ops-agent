@@ -4,9 +4,9 @@
    "model": "Qwen2.5-1.5B base (zero-shot)",
    "accuracy": 0.4667,
    "macro_f1": 0.392,
-   "median_latency_ms": 130.3,
-   "p95_latency_ms": 548.3,
-   "cost_per_1k_msgs_usd": 0.0127,
+   "median_latency_ms": 138.8,
+   "p95_latency_ms": 180.5,
+   "cost_per_1k_msgs_usd": 0.0135,
    "confusion": [
     [
      20,
@@ -60,11 +60,11 @@
   },
   "finetuned": {
    "model": "Qwen2.5-1.5B fine-tuned (LoRA)",
-   "accuracy": 0.9417,
-   "macro_f1": 0.9383,
-   "median_latency_ms": 220.3,
-   "p95_latency_ms": 306.6,
-   "cost_per_1k_msgs_usd": 0.0214,
+   "accuracy": 0.95,
+   "macro_f1": 0.9479,
+   "median_latency_ms": 231.2,
+   "p95_latency_ms": 309.3,
+   "cost_per_1k_msgs_usd": 0.0225,
    "confusion": [
     [
      20,
@@ -94,8 +94,8 @@
      1,
      2,
      2,
-     14,
-     1,
+     15,
+     0,
      0
     ],
     [
@@ -115,7 +115,7 @@
      20
     ]
    ],
-   "train_minutes_t4": 2.9
+   "train_minutes_t4": 3.1
   }
  },
  "still_wrong": [
@@ -138,11 +138,6 @@
    "is your packaging plastic free",
    "policy_question",
    "product_question"
-  ],
-  [
-   "what number can i ring you on",
-   "policy_question",
-   "escalation"
   ],
   [
    "Can I add an item to an order I already placed?",

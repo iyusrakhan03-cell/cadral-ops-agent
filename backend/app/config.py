@@ -43,6 +43,12 @@ class Settings(BaseSettings):
     vector_store: str = "auto"           # auto = Pinecone if a key is set, else local | pinecone | local
     hybrid_alpha: float = 0.5            # 1.0 = meaning only, 0.0 = keywords only
 
+    # --- Fine-tuned router model (Qwen2.5-1.5B LoRA, GGUF q4_k_m, runs on CPU via llama.cpp) ---
+    # Uses backend/models/<file> if present; else downloads from ROUTER_GGUF_REPO; else falls back to the LLM.
+    router_gguf_path: str = str(BACKEND_DIR / "models" / "tp-router-qwen2.5-1.5b-q4_k_m.gguf")
+    router_gguf_repo: str = "iyusrakhan/tp-router-qwen2.5-1.5b-gguf"
+    router_model: str = "auto"           # auto = fine-tuned if available | llm = always GPT-OSS-20B
+
     @property
     def use_pinecone(self) -> bool:
         return self.vector_store == "pinecone" or (self.vector_store == "auto" and bool(self.pinecone_api_key))
