@@ -82,16 +82,23 @@ def require_admin(user: User = Depends(current_user)) -> User:
 
 
 def seed_staff() -> None:
-    """Create the first admin and agent accounts if there are no staff yet."""
+    """Make sure the admin and agent accounts from the settings exist with the configured passwords.
+
+    Runs at every start, so changing ADMIN_PASSWORD / AGENT_PASSWORD in the environment and restarting
+    is how passwords are rotated (also on a deployed copy that shipped with an older database)."""
     s_ = get_settings()
+    wanted = [(s_.admin_email, s_.admin_password, "admin", "Admin"),
+              (s_.agent_email, s_.agent_password, "agent", "Support Agent")]
     with SessionLocal() as s:
-        if s.query(User).count():
-            return
-        s.add_all([
-            User(email=s_.admin_email.lower(), name="Admin", role="admin", password_hash=hash_password(s_.admin_password)),
-            User(email=s_.agent_email.lower(), name="Support Agent", role="agent",
-                 password_hash=hash_password(s_.agent_password)),
-        ])
+        for email, password, role, name in wanted:
+            email = email.strip().lower()
+            u = s.query(User).filter(User.email == email).first()
+            if u is None:
+                s.add(User(email=email, name=name, role=role, password_hash=hash_password(password)))
+                log.warning("Created staff account %s (%s)", email, role)
+            elif not verify_password(password, u.password_hash) or u.role != role:
+                u.password_hash, u.role, u.active = hash_password(password), role, True
+                log.warning("Updated password/role for %s from settings", email)
         s.commit()
-    log.warning("Created first-run staff accounts %s (admin) and %s (agent). Change the passwords via env vars.",
-                s_.admin_email, s_.agent_email)
+    if s_.admin_password == "admin-demo-123" or s_.agent_password == "agent-demo-123":
+        log.warning("Staff accounts use the public demo passwords. Set ADMIN_PASSWORD / AGENT_PASSWORD before going live.")
