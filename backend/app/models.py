@@ -206,3 +206,26 @@ class Feedback(Base):
     created_by: Mapped[str] = mapped_column(String(60))
     times_used: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+
+
+# ====================================================================== dashboard staff + settings
+STAFF_ROLES = ("admin", "agent")
+
+
+class User(Base):
+    """A member of staff who signs in to the dashboard. Customers are in `customers`, not here."""
+    __tablename__ = "users"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(String(200), unique=True, index=True)
+    name: Mapped[str] = mapped_column(String(120))
+    role: Mapped[str] = mapped_column(String(10))            # admin | agent
+    password_hash: Mapped[str] = mapped_column(String(300))
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class Setting(Base):
+    """Small key/value store for settings an admin changes from the dashboard (e.g. review_mode)."""
+    __tablename__ = "settings"
+    key: Mapped[str] = mapped_column(String(60), primary_key=True)
+    value: Mapped[str] = mapped_column(Text)

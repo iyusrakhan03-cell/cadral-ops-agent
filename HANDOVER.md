@@ -28,9 +28,9 @@ We made up a shop called **Thistle & Pine**, an online homeware store (pans, bed
 | 1 | **Multi-agent system**: a Router plus 3 specialists (Support, Orders, Escalation), with shared memory | ✅ Done |
 | 2 | **Advanced RAG**: 20+ docs (PDF, web pages, product CSV), keyword + vector search, reranking, citations, says "I don't know" | ✅ Done |
 | 3 | **Fine-tune a small model (1–3B)**, compare it with the base model, and explain when to use fine-tuning vs RAG vs a big API model | ✅ Mostly done: trained, compared, and live in the app. Still owed: the "big model" comparison run, plus the written explanation on Day 5 |
-| 4 | **Self-improving loop**: human edits/rejects a reply, it's saved and used to improve future answers | 🟡 Database table and "learn from corrections" code exist. The dashboard buttons that create corrections come on Day 3 |
+| 4 | **Self-improving loop**: human edits/rejects a reply, it's saved and used to improve future answers | ✅ Day 3: Approve/Edit/Reject in the dashboard; corrections feed the Support agent and export as a re-training set |
 | 5 | **Automation**: 2+ channels (email + web chat or Telegram), daily management report by email, Slack alerts, retries so nothing is lost | 🟡 Retries and "never lose a message" are done. Channels, daily report and Slack are Day 4 (the alert functions exist but only log for now) |
-| 6 | **Dashboard**: login with roles (admin/agent), live chat view with streaming, agent trace, approve/edit/reject, analytics | ❌ Day 3. All the data it needs is already being recorded |
+| 6 | **Dashboard**: login with roles (admin/agent), live chat view with streaming, agent trace, approve/edit/reject, analytics | ✅ Day 3 (runs locally; deployed on Day 4) |
 | 7 | **Evals & monitoring**: 50+ test messages, one command gives a score, track cost and latency per request | ✅ Done: 102 tests, one command. Official final run still to do |
 | 8 | **Deployment**: live, Dockerised, secrets in environment variables | ❌ Day 4. Secrets are already in env vars |
 
@@ -147,6 +147,27 @@ python -m scripts.build_index                                                   
 - Red "ERROR … symlink" lines while models download are harmless.
 
 ---
+
+### Day 3: dashboard (run it)
+
+```bash
+# terminal 1 — API (http://localhost:8000, docs at /docs)
+cd backend && uvicorn app.main:app --reload --port 8000
+# terminal 2 — dashboard (http://localhost:3000)
+cd dashboard && npm install && npm run dev
+```
+
+- **First-run logins** (created automatically, override with `ADMIN_EMAIL/ADMIN_PASSWORD/AGENT_EMAIL/AGENT_PASSWORD` in `.env` before first start):
+  admin `admin@thistleandpine.co.uk` / `admin-demo-123`, agent `agent@thistleandpine.co.uk` / `agent-demo-123`.
+  Also set `JWT_SECRET` in `.env`, or everyone is signed out on each restart.
+- **Admin** can do everything; **agent** can't approve refunds or change settings.
+- Customer chat widget: `http://localhost:3000/chat` (pick a demo customer under "Chat as").
+- **Streaming:** routing and each tool call appear live as they happen; the finished reply is then typed out word by word.
+  (Groq calls aren't token-streamed yet, because the Orders agent only knows it's done after its tool loop.)
+- **Learning demo:** edit a Support-agent reply → ask a similar question → the new answer follows your correction
+  (similarity ≥ 0.80). Orders/Escalation corrections are saved to the re-training export, not used live.
+- Starting the server adds `users` and `settings` tables to `backend/data/local.db`.
+- Dashboard config: `dashboard/.env.local` with `NEXT_PUBLIC_API_URL`; backend allows `CORS_ORIGINS` (default `http://localhost:3000`).
 
 ## 6. Rules and decisions — please don't break these
 

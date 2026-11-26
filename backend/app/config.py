@@ -49,6 +49,17 @@ class Settings(BaseSettings):
     router_gguf_repo: str = "iyusrakhan/tp-router-qwen2.5-1.5b-gguf"
     router_model: str = "auto"           # auto = fine-tuned if available | llm = always GPT-OSS-20B
 
+    # --- Dashboard / API ---
+    jwt_secret: str = ""                 # blank = random per process (everyone is signed out on restart)
+    jwt_hours: int = 12
+    cors_origins: str = "http://localhost:3000"   # comma-separated dashboard URLs
+    # First-run staff accounts (created only if the users table is empty). CHANGE THESE in production.
+    admin_email: str = "admin@thistleandpine.co.uk"
+    admin_password: str = "admin-demo-123"
+    agent_email: str = "agent@thistleandpine.co.uk"
+    agent_password: str = "agent-demo-123"
+    warmup_models: bool = True           # load search + router models at startup so the first chat is fast
+
     @property
     def use_pinecone(self) -> bool:
         return self.vector_store == "pinecone" or (self.vector_store == "auto" and bool(self.pinecone_api_key))

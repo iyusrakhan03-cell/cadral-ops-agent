@@ -19,3 +19,4 @@ finetune/*.gguf
 backend/data/eval.db
 backend/models/
 evals/*.log
+*.tsbuildinfo
