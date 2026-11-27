@@ -11,6 +11,7 @@ export const useUser = () => useContext(UserCtx);
 
 const NAV: { href: string; label: string; badge?: keyof Counts; admin?: boolean }[] = [
   { href: "/conversations", label: "Live conversations", badge: "pending_review" },
+  { href: "/playground", label: "Talk to the AI" },
   { href: "/escalations", label: "Escalations", badge: "open_escalations" },
   { href: "/refunds", label: "Refund approvals", badge: "pending_refunds", admin: true },
   { href: "/analytics", label: "Analytics" },
