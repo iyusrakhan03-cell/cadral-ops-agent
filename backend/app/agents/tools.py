@@ -27,6 +27,7 @@ class ToolContext:
     conversation: Conversation
     handoffs: list[dict] = field(default_factory=list)   # requests for the Escalation agent
     actions: list[str] = field(default_factory=list)     # human-readable list of DB changes this turn
+    citations: list[dict] = field(default_factory=list)  # help-centre sources the Orders agent quoted
 
 
 def _why(desc: str = "One short sentence: why you are calling this tool now.") -> dict:
@@ -62,6 +63,12 @@ TOOL_SPECS = [
         ["order_id", "new_address"]),
     _fn("open_courier_investigation", "Open a lost-parcel investigation with the courier when tracking has "
         "stopped updating. Use for dispatched orders that seem stuck or lost.", {"order_id": ORDER_ID}, ["order_id"]),
+    _fn("search_help_centre", "Look up shop rules and facts in the company's help documents: delivery times and "
+        "costs, returns/refund rules, damage and fault reporting windows, warranties, product care, discounts. Use it "
+        "for ANY general question, even when phrased about 'my parcel' or 'my order'. Returns a sourced answer, or "
+        "found=false when the documents don't cover it.",
+        {"question": {"type": "string", "description": "The general question, written as a standalone question"}},
+        ["question"]),
     _fn("handoff_to_human", "Hand the conversation to a human colleague (compensation/goodwill requests, "
         "anything you cannot resolve, or the customer insists on a person).",
         {"reason": {"type": "string"}}, ["reason"]),
@@ -227,10 +234,24 @@ def open_courier_investigation(ctx: ToolContext, order_id: str, **_) -> dict:
             "complete our team will either resend your order or refund you, and they'll email you either way."}
 
 
+def search_help_centre(ctx: ToolContext, question: str, **_) -> dict:
+    """The same document search + answer the Support agent uses (citations, "I don't know" gate)."""
+    from ..rag.answer import answer_question
+    res = answer_question(question)
+    if res.idk:
+        return {"found": False, "tell_customer": "We don't have that information in our help centre."}
+    offset = len(ctx.citations)
+    text = re.sub(r"\[(\d+)\]", lambda m: f"[{int(m.group(1)) + offset}]", res.answer)
+    for c in res.citations:
+        ctx.citations.append({**c.__dict__, "n": c.n + offset})
+    return {"found": True, "answer": text, "sources": [f"[{c.n + offset}] {c.title}" for c in res.citations]}
+
+
 def handoff_to_human(ctx: ToolContext, reason: str, **_) -> dict:
     ctx.handoffs.append({"category": "agent_handoff", "severity": "medium", "reason": reason})
     return {"handed_off": True}
 
 
 REGISTRY = {f.__name__: f for f in (verify_customer, list_my_orders, get_order, issue_refund, cancel_order,
-                                     update_shipping_address, open_courier_investigation, handoff_to_human)}
+                                     update_shipping_address, open_courier_investigation, search_help_centre,
+                                     handoff_to_human)}

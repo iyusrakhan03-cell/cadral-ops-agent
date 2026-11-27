@@ -100,14 +100,20 @@ def answer_question(question: str, *, history: list[dict] | None = None,
         return AnswerResult(IDK_MESSAGE, idk=True, idk_reason="low_retrieval_score", retrieval=result,
                             latency_ms=(time.perf_counter() - t0) * 1000)
 
-    system = SYSTEM_PROMPT
+    # Self-improving loop: replies a human corrected for very similar questions sit right next to the question,
+    # so the model treats them as the expected answer rather than loose style hints.
+    corrections = ""
     if examples:
-        system += "\n\nExamples of replies our human team approved (match their tone and accuracy):\n" + "\n".join(
-            f"Customer: {e['question']}\nGood reply: {e['answer']}" for e in examples)
+        corrections = (
+            "\n\nOur human team already corrected the reply to a very similar question. Base your answer on the "
+            "corrected reply and include ALL of its information (its facts are verified, so you may state them even "
+            "if the sources don't; add source numbers for anything that comes from the sources):\n"
+            + "\n".join(f"- Question: {e['question']}\n  Corrected reply: {e['answer']}" for e in examples))
 
-    messages = [{"role": "system", "content": system}]
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
     messages += (history or [])[-6:]
-    messages.append({"role": "user", "content": f"Sources:\n{_format_sources(result)}\n\nCustomer question: {question}"})
+    messages.append({"role": "user", "content": f"Sources:\n{_format_sources(result)}{corrections}\n\n"
+                                                f"Customer question: {question}"})
 
     llm = chat(messages, temperature=0.1, max_tokens=1200)
     text = normalise(llm.content)

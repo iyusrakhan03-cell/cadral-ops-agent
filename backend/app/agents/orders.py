@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 import time
 from datetime import date
 
@@ -18,7 +19,9 @@ You can look up orders and take real actions with your tools. Tools change the r
 {profile}
 
 How to work:
-- If the customer is NOT VERIFIED, ask for the email address on the order and the order number, then call verify_customer. Never discuss or change an order before verification.
+- General questions about shop rules or facts (how long to report damage, what happens when tracking stops, delivery days, returns rules, product care) - even when worded about "my parcel" or "my order" - call search_help_centre and answer from it, keeping its [n] source markers. Never state a policy, timescale, date or price from memory. If it returns found=false, say we don't have that information and give our contact details: support@thistleandpine.co.uk, 0113 496 0321.
+- Answer the general part straight away, even for customers who are NOT VERIFIED. Then, if they want something done on a specific order, ask for the email address on the order and the order number.
+- If the customer is NOT VERIFIED, ask for the email address on the order and the order number, then call verify_customer. Never discuss or change a specific order before verification.
 - If the profile above says "(verified)", the customer is ALREADY verified (signed in): never ask for their email or to confirm identity — look up their orders with list_my_orders / get_order straight away.
 - If the customer clearly asks for an action (refund, cancel, address change) and you have the order number and reason, do it now with the tool — don't ask "are you sure?". If something essential is missing (which order? which item? new address?), ask one short question.
 - If the customer has exactly one order that fits what they describe, or says "my latest/last order", use that order from the profile without asking for the number.
@@ -26,7 +29,7 @@ How to work:
 - For refunds, call issue_refund: the shop's policy engine decides the outcome and amount. Tell the customer what `tell_customer` says, in your own warm words. NEVER reveal internal_reasons, thresholds or policy rules behind a decision.
 - For a parcel whose tracking is stuck or which seems lost, call open_courier_investigation.
 - For compensation/goodwill requests or anything you cannot do, call handoff_to_human and tell the customer a colleague will follow up within one working day.
-- Only state facts that come from tool results or the profile above. Never invent dates, amounts, tracking numbers or policies.
+- Only state facts that come from tool results or the profile above. Never invent dates, amounts, tracking numbers or policies - look rules up with search_help_centre.
 - Never ask for or repeat card details.
 - Reply in British English, 1-4 short sentences, friendly and specific (order number, amount, next step)."""
 
@@ -77,5 +80,7 @@ def run(text: str, history: list[dict], ctx: ToolContext, on_event=None) -> Agen
         reply = "Sorry, something went wrong on my side — a colleague will follow up shortly."
     errors = [s for s in steps if isinstance(s["result"], dict) and s["result"].get("error")]
     confidence = 0.95 if steps and not errors else (0.7 if not steps else 0.5)
-    return AgentResult("orders", reply, steps=steps, llm_calls=calls, confidence=confidence,
+    used = {int(n) for n in re.findall(r"\[(\d+)\]", reply)}
+    citations = [c for c in ctx.citations if c["n"] in used]
+    return AgentResult("orders", reply, citations=citations, steps=steps, llm_calls=calls, confidence=confidence,
                        handoffs=list(ctx.handoffs))
