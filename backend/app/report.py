@@ -70,7 +70,10 @@ def build(day: date | None = None) -> dict:
         pending_refunds = s.scalars(select(Refund).where(Refund.status == "pending_approval")).all()
         data = {
             "date": day.isoformat(),
-            "date_label": day.strftime("%A %d %B %Y"),
+            # A report for the current shop day is partial: say so, with the shop time it was taken.
+            "date_label": day.strftime("%A %d %B %Y") + (
+                f" (so far, up to {datetime.now(tz).strftime('%H:%M')} UK time)"
+                if day == datetime.now(tz).date() else ""),
             "conversations": len(convs),
             "by_channel": dict(Counter(c.channel for c in convs)),
             "ai_replies": len(traces),
