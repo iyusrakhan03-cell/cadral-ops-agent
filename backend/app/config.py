@@ -78,6 +78,9 @@ class Settings(BaseSettings):
     google_client_secret: str = ""
     gmail_refresh_token: str = ""
     gmail_poll_s: int = 20               # how often to check the inbox / send queued emails
+    # Only handle email sent to this address (e.g. you+thistlepine@gmail.com). Lets the shop share a personal
+    # Gmail without the AI touching personal mail. Blank = every unread email in the inbox (dedicated account).
+    gmail_shop_address: str = ""
 
     # --- Database backup to a private Hugging Face dataset (free hosting has no permanent disk) ---
     hf_token: str = ""

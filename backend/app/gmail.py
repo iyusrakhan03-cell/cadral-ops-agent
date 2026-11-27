@@ -38,6 +38,12 @@ SENDER_NAME = "Thistle & Pine Customer Care"
 MAX_PER_RUN = 15
 INBOX_QUERY = "in:inbox is:unread newer_than:7d"
 
+
+def inbox_query() -> str:
+    """With GMAIL_SHOP_ADDRESS set, only mail delivered to that address (e.g. a +alias) is the shop's."""
+    shop = get_settings().gmail_shop_address.strip()
+    return f"{INBOX_QUERY} deliveredto:{shop}" if shop else INBOX_QUERY
+
 _token: dict = {"access": "", "exp": 0.0}
 _me: str = ""
 _started = False
@@ -136,7 +142,7 @@ def is_automated(headers: dict[str, str], sender: str) -> bool:
 def pull_inbound() -> int:
     from .channels import accept_inbound
     me = my_address()
-    listing = _api("GET", "/messages", params={"q": INBOX_QUERY, "maxResults": MAX_PER_RUN})
+    listing = _api("GET", "/messages", params={"q": inbox_query(), "maxResults": MAX_PER_RUN})
     n = 0
     for ref in listing.get("messages", []) or []:
         msg = _api("GET", f"/messages/{ref['id']}", params={"format": "full"})
@@ -157,6 +163,9 @@ def pull_inbound() -> int:
 def build_mime(e: dict, sender: str, original: dict[str, str] | None = None) -> EmailMessage:
     m = EmailMessage()
     m["From"] = formataddr((SENDER_NAME, sender))
+    shop = get_settings().gmail_shop_address.strip()
+    if shop:                                       # customer replies come back to the shop address
+        m["Reply-To"] = formataddr((SENDER_NAME, shop))
     if original:                                   # reply inside the customer's own thread
         to = original.get("reply-to") or original.get("from") or e.get("to")
         subj = original.get("subject", "") or e.get("subject", "")
