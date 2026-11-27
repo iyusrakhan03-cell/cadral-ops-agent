@@ -71,8 +71,9 @@ async def lifespan(_: FastAPI):
     seed_staff()
     if get_settings().warmup_models:
         threading.Thread(target=_warmup, daemon=True).start()
-    from . import backup, channels
+    from . import backup, channels, gmail
     channels.start_workers()     # email/Telegram inbound, outbox delivery + retries, daily report
+    gmail.start()                # email channel over the Gmail API, if GOOGLE_* + GMAIL_REFRESH_TOKEN are set
     backup.start()               # free hosting: snapshot the database to a private HF dataset
     yield
     backup.stop()

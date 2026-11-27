@@ -1,5 +1,8 @@
 # Gmail bridge — the email channel
 
+> **Superseded:** the backend now reads Gmail itself over OAuth, see `channels/gmail-api/README.md`.
+> This Apps Script still works as a fallback.
+
 Customers email the shop's Gmail address → the AI answers in the same email thread. The daily management
 report is also sent from this Gmail.
 

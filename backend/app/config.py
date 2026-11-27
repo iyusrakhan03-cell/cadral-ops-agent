@@ -72,6 +72,12 @@ class Settings(BaseSettings):
     report_timezone: str = "Europe/London"   # ...in the shop's time zone
     dashboard_url: str = ""              # links in Slack alerts / the report point here
     workers: bool = True                 # background delivery + inbound + report workers (off in evals/tests)
+    # Email over the Gmail API (OAuth). Client from Google Cloud Console; the refresh token is written by
+    # `python -m scripts.gmail_auth`. All three set = the backend reads and sends the shop's Gmail itself.
+    google_client_id: str = ""
+    google_client_secret: str = ""
+    gmail_refresh_token: str = ""
+    gmail_poll_s: int = 20               # how often to check the inbox / send queued emails
 
     # --- Database backup to a private Hugging Face dataset (free hosting has no permanent disk) ---
     hf_token: str = ""

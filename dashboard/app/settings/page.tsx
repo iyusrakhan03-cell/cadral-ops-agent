@@ -7,7 +7,7 @@ interface S { review_mode: string; review_modes: Record<string, string> }
 interface OutRow { id: number; channel: string; kind: string; status: string; attempts: number; target: string | null;
   last_error: string | null; created_at: string; sent_at: string | null }
 interface Ch { inbound_waiting: number; inbound_failed: number; outbox_pending: number; outbox_failed: number;
-  email_bridge: boolean; telegram_relay: boolean; slack: boolean; daily_report_to: boolean; recent: OutRow[] }
+  email_bridge: boolean; email_mode?: string | null; gmail?: { address: string | null; last_error: string | null }; telegram_relay: boolean; slack: boolean; daily_report_to: boolean; recent: OutRow[] }
 
 function Channels() {
   const [c, setC] = useState<Ch | null>(null);
@@ -25,11 +25,12 @@ function Channels() {
       {err && <div className="error">{err}</div>}
       {c && (<>
         <div className="row" style={{ gap: 16 }}>
-          <span>Email (Gmail bridge) {on(c.email_bridge)}</span>
+          <span>Email ({c.email_mode === "gmail_api" ? `Gmail API${c.gmail?.address ? ` · ${c.gmail.address}` : ""}` : "Gmail bridge"}) {on(c.email_bridge)}</span>
           <span>Telegram {on(c.telegram_relay)}</span>
           <span>Slack alerts {on(c.slack)}</span>
           <span>Daily report email {on(c.daily_report_to)}</span>
         </div>
+        {c.gmail?.last_error && <div className="error">Email: {c.gmail.last_error}</div>}
         <div className="faint">
           Waiting to process: {c.inbound_waiting} · waiting to send: {c.outbox_pending} · failed: {c.outbox_failed + c.inbound_failed}.
           Nothing is dropped: messages are saved first and sends are retried (10 s → 1 h) until the channel confirms.

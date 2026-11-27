@@ -199,7 +199,7 @@ def slack_summary(d: dict) -> tuple[str, list]:
 
 # ---------------------------------------------------------------------------------------------- sending
 def send(day: date | None = None, *, to: str | None = None) -> dict:
-    """Queue the report email (sent by the Gmail bridge) and post the Slack summary."""
+    """Queue the report email (sent by the email channel: Gmail API or bridge) and post the Slack summary."""
     from . import notify
     from .channels import enqueue
     d = build(day)

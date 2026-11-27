@@ -389,6 +389,7 @@ def _outbox_loop() -> None:
 
 def status() -> dict:
     """For /api/health and the dashboard: is anything stuck?"""
+    from . import gmail
     with SessionLocal() as s:
         def count(model, **kw):
             q = select(model)
@@ -400,7 +401,9 @@ def status() -> dict:
                 "inbound_failed": count(InboundEvent, status="failed"),
                 "outbox_pending": count(Outbox, status="pending"),
                 "outbox_failed": count(Outbox, status="failed"),
-                "email_bridge": bool(st.bridge_key), "telegram_relay": bool(st.relay_url and st.bridge_key),
+                "email_bridge": bool(st.bridge_key) or gmail.configured(),
+                "email_mode": "gmail_api" if gmail.configured() else ("apps_script" if st.bridge_key else None),
+                "gmail": gmail.status(), "telegram_relay": bool(st.relay_url and st.bridge_key),
                 "slack": bool(st.slack_webhook_url), "daily_report_to": bool(st.manager_email)}
 
 
