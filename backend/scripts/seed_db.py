@@ -114,8 +114,18 @@ def make_order(s, oid: str, cust: Customer, items: list[tuple[Product, int]], cr
 
 
 def main():
+    # Keep admin settings across a reset (review mode, and the note that today's daily report was already
+    # sent - otherwise every reset re-posts the report to Slack and email).
+    from app.models import Setting
+    try:
+        with session_scope() as s:
+            kept = [(r.key, r.value) for r in s.query(Setting).all()]
+    except Exception:  # noqa: BLE001 - first run: no settings table yet
+        kept = []
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
+    with session_scope() as s:
+        s.add_all([Setting(key=k, value=v) for k, v in kept])
 
     with session_scope() as s:
         products = load_products(s)

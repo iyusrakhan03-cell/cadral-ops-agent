@@ -42,6 +42,18 @@ ESCALATION_PATTERNS = {
 }
 
 
+# Attempts to talk the AI out of its rules. Detected in code (not by the model being manipulated) so the
+# human ticket can say so plainly instead of presenting the demand as a genuine complaint.
+MANIPULATION_PATTERN = (r"\b(system override|admin mode|developer mode|god mode|jailbreak|"
+                        r"ignore (all |the |your |any )?(previous |prior |above )?(instructions|rules|polic(y|ies)|prompt)|"
+                        r"(bypass|override|skip) (the |your |all )?(rules|policy|policies|checks|system)|"
+                        r"tell the system (it'?s|it is|that)|you are now (in|an?|my)|new instructions)\b")
+
+
+def manipulation_signals(text: str) -> bool:
+    return bool(re.search(MANIPULATION_PATTERN, text.lower()))
+
+
 def escalation_triggers(text: str) -> list[str]:
     t = text.lower()
     return [name for name, pat in ESCALATION_PATTERNS.items() if re.search(pat, t)]
